@@ -5,4 +5,4 @@ Software Rasterizer for M5Stack
 Experimental software rasterizer for M5Stack.
 
 # Demo
-![demo](https://raw.github.com/wiki/kumaashi/M5StackSandbox/SWRasterizer/images/sample.gif)
+![demo](https://github.com/kumaashi/M5StackSandbox/raw/master/SWRasterizer/images/sample.gif)
