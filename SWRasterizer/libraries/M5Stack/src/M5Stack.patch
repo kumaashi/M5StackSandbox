@@ -1,0 +1,69 @@
+diff --git a/M5Display.cpp b/M5Display.cpp
+index 53bb8ff..fd61b1f 100644
+--- a/M5Display.cpp
++++ b/M5Display.cpp
+@@ -6,6 +6,7 @@ M5Display::M5Display() : TFT_eSPI() {}
+ 
+ void M5Display::begin() {
+   TFT_eSPI::begin();
++  setSwapBytes(true);
+   setRotation(1);
+   fillScreen(0);
+ 
+diff --git a/utility/In_eSPI.cpp b/utility/In_eSPI.cpp
+index 528408d..b377ddc 100644
+--- a/utility/In_eSPI.cpp
++++ b/utility/In_eSPI.cpp
+@@ -1360,6 +1360,40 @@ void TFT_eSPI::pushImage(int32_t x, int32_t y, uint32_t w, uint32_t h, uint8_t *
+   spi_end();
+ }
+ 
++void TFT_eSPI::pushImageEx(int32_t x, int32_t y, uint32_t w, uint32_t h, uint16_t *data, int ext_num)
++{
++
++  if ((x >= (int32_t)_width) || (y >= (int32_t)_height)) return;
++
++  int32_t dx = 0;
++  int32_t dy = 0;
++  int32_t dw = w;
++  int32_t dh = h;
++
++  if (x < 0) { dw += x; dx = -x; x = 0; }
++  if (y < 0) { dh += y; dy = -y; y = 0; }
++
++  if ((x + w) > _width ) dw = _width  - x;
++  if ((y + h) > _height) dh = _height - y;
++
++  if (dw < 1 || dh < 1) return;
++
++  spi_begin();
++  inTransaction = true;
++
++  data += dx + dy * w;
++
++  for(int i = 0; i < dh ; i += ext_num) {
++    setAddrWindow(x, y + i, x + dw - 1, y + dh - 1 + i); // Sets CS low and sent RAMWR
++    pushColors(data, dw, _swapBytes);
++    data += w;
++  }
++
++  CS_H;
++
++  inTransaction = false;
++  spi_end();
++}
+ 
+ /***************************************************************************************
+ ** Function name:           setSwapBytes
+diff --git a/utility/In_eSPI.h b/utility/In_eSPI.h
+index fc44ce0..5828677 100644
+--- a/utility/In_eSPI.h
++++ b/utility/In_eSPI.h
+@@ -583,6 +583,7 @@ class TFT_eSPI : public Print {
+            // These are used to render images or sprites stored in RAM arrays
+   void     pushImage(int32_t x0, int32_t y0, uint32_t w, uint32_t h, uint16_t *data);
+   void     pushImage(int32_t x0, int32_t y0, uint32_t w, uint32_t h, uint16_t *data, uint16_t transparent);
++  void     pushImageEx(int32_t x, int32_t y, uint32_t w, uint32_t h, uint16_t *data, int ext_num);
+ 
+            // These are used to render images stored in FLASH (PROGMEM)
+   void     pushImage(int32_t x0, int32_t y0, uint32_t w, uint32_t h, const uint16_t *data, uint16_t transparent);
