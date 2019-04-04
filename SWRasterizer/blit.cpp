@@ -59,7 +59,10 @@ static void blitTask(void *)
     if (xQueueReceive(blitQueue, &b, portMAX_DELAY) == pdTRUE)
     {
       //debug_printf("DEBUG : %s : buf=%p\n", __func__, b.blitBuffer);
-      M5.Lcd.pushImageEx(b.blitX, b.blitY, b.blitW, b.blitH * b.idx, (uint16_t *)b.blitBuffer, b.idx);
+      uint16_t *src = (uint16_t *)b.blitBuffer;
+      for(int i = 0 ; i < b.blitH; i++) {
+        M5.Lcd.pushImage(b.blitX, b.blitY + i * b.idx, b.blitW, 1, &src[i * b.blitW]);
+      }
     }
   }
 }
