@@ -1,15 +1,3 @@
-diff --git a/M5Display.cpp b/M5Display.cpp
-index 53bb8ff..fd61b1f 100644
---- a/M5Display.cpp
-+++ b/M5Display.cpp
-@@ -6,6 +6,7 @@ M5Display::M5Display() : TFT_eSPI() {}
- 
- void M5Display::begin() {
-   TFT_eSPI::begin();
-+  setSwapBytes(true);
-   setRotation(1);
-   fillScreen(0);
- 
 diff --git a/utility/In_eSPI.cpp b/utility/In_eSPI.cpp
 index 528408d..b377ddc 100644
 --- a/utility/In_eSPI.cpp

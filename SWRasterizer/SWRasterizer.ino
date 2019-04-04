@@ -187,6 +187,7 @@ void loop()
 void setup(void)
 {
   M5.begin();
+  M5.Lcd.setSwapBytes(true);
   pinMode(22, OUTPUT); //For Debug
   gentable();
   renderer::Setup();
