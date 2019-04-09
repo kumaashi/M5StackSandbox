@@ -364,7 +364,7 @@ void Present(uint16_t (*clearcallback)(int x, int y))
 
       //rasterization per polygons;
       int listCount = 0;
-      while (p != mark)
+      while (*p != mark)
       {
         listCount++;
         int i = *p++;
