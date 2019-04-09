@@ -330,9 +330,8 @@ void Present(uint16_t (*clearcallback)(int x, int y))
         int32_t min_ty = ty;
         int32_t max_tx = tx + TILE_X_SIZE;
         int32_t max_ty = ty + TILE_X_SIZE;
-        if(!(
-          min_tx > max_x || max_tx < min_x ||
-          min_ty > max_y || max_ty < min_y))
+        auto isvalid = !(min_tx > max_x || max_tx < min_x || min_ty > max_y || max_ty < min_y);
+        if (isvalid)
         {
           chainBuffer.push_back(i / 3);
         }
@@ -340,7 +339,7 @@ void Present(uint16_t (*clearcallback)(int x, int y))
       chainBuffer.push_back(mark);
     }
   }
-  
+
   uint8_t *p = chainBuffer.data();
   for (int ty = 0; ty < HEIGHT; ty += TILE_Y_SIZE)
   {
@@ -369,7 +368,7 @@ void Present(uint16_t (*clearcallback)(int x, int y))
       {
         listCount++;
         int i = *p++;
-        
+
         i *= 3;
 
         ScreenPos v0 = screenpos[i + 0];
