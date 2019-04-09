@@ -309,6 +309,39 @@ void Present(uint16_t (*clearcallback)(int x, int y))
   int vbuffer_size = screenpos.size();
   int textureWidthMask = textureWidth - 1;
   int textureHeightMask = textureHeight - 1;
+
+  //Create Primitive Lists
+  std::vector<uint8_t> chainBuffer;
+  const uint8_t mark = 0xFF;
+  for (int ty = 0; ty < HEIGHT; ty += TILE_Y_SIZE)
+  {
+    for (int tx = 0; tx < WIDTH; tx += TILE_X_SIZE)
+    {
+      for (int i = 0; i < vbuffer_size; i += 3)
+      {
+        ScreenPos v0 = screenpos[i + 0];
+        ScreenPos v1 = screenpos[i + 1];
+        ScreenPos v2 = screenpos[i + 2];
+        int32_t min_x = _min(_min(v0.x, v1.x), v2.x);
+        int32_t max_x = _max(_max(v0.x, v1.x), v2.x);
+        int32_t min_y = _min(_min(v0.y, v1.y), v2.y);
+        int32_t max_y = _max(_max(v0.y, v1.y), v2.y);
+        int32_t min_tx = tx;
+        int32_t min_ty = ty;
+        int32_t max_tx = tx + TILE_X_SIZE;
+        int32_t max_ty = ty + TILE_X_SIZE;
+        if(!(
+          min_tx > max_x || max_tx < min_x ||
+          min_ty > max_y || max_ty < min_y))
+        {
+          chainBuffer.push_back(i / 3);
+        }
+      }
+      chainBuffer.push_back(mark);
+    }
+  }
+  
+  uint8_t *p = chainBuffer.data();
   for (int ty = 0; ty < HEIGHT; ty += TILE_Y_SIZE)
   {
     for (int tx = 0; tx < WIDTH; tx += TILE_X_SIZE)
@@ -331,8 +364,14 @@ void Present(uint16_t (*clearcallback)(int x, int y))
       }
 
       //rasterization per polygons;
-      for (int i = 0; i < vbuffer_size; i += 3)
+      int listCount = 0;
+      while (p != mark)
       {
+        listCount++;
+        int i = *p++;
+        
+        i *= 3;
+
         ScreenPos v0 = screenpos[i + 0];
         ScreenPos v1 = screenpos[i + 1];
         ScreenPos v2 = screenpos[i + 2];
@@ -419,7 +458,20 @@ void Present(uint16_t (*clearcallback)(int x, int y))
           ry++;
         }
       }
+
+#ifdef PROFILE_DRAW_TILE_VISUALIZATION
+      for (int y = 0; y < TILE_Y_SIZE; y++)
+      {
+        for (int x = 0; x < TILE_X_SIZE; x++)
+        {
+          int i = x + y * TILE_X_SIZE;
+          backbuffer[i] += listCount;
+        }
+      }
+#endif //PROFILE_DRAW_TILE_VISUALIZATION
+
       blit::Request(tx, ty * EXT_NUM + (present_index & 1), TILE_X_SIZE, TILE_Y_SIZE, backbuffer, zbuffer, EXT_NUM);
+      p++;
     }
   }
 #ifdef PROFILE_DRAW_RASTERIZATION

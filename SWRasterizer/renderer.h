@@ -19,6 +19,7 @@
 
 //#define PROFILE_CACHE_UPDATE
 //#define PROFILE_DRAW_RASTERIZATION
+//#define PROFILE_DRAW_TILE_VISUALIZATION
 
 namespace renderer
 {
